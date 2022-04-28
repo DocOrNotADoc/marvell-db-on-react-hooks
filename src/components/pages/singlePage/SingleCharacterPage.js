@@ -3,15 +3,14 @@ import { useState, useEffect } from 'react';
 import {Helmet} from "react-helmet";
 
 import useMarvelService from '../../../services/MarvelService';
-import Spinner from '../../spinner/Spinner';
-import ErrorMessage from '../../errorMessage/ErrorMessage';
 import AppBanner from "../../appBanner/AppBanner";
+import setContent from '../../../utils/setContent';
 import './singlePage.scss';
 
 const SingleCharacterPage = () => {
     const {id} = useParams();
-    const [char, setChar] = useState(null);
-    const {loading, error, getCharacter, clearError} = useMarvelService();
+    const [data, setData] = useState(null);
+    const {getCharacter, clearError, process, setProcess} = useMarvelService();
 
     useEffect(() => {
         updateChar()
@@ -21,28 +20,23 @@ const SingleCharacterPage = () => {
         clearError();
         getCharacter(id)
             .then(onCharLoaded)
+            .then(() => setProcess('confirmed'));
     }
 
-    const onCharLoaded = (char) => {
-        setChar(char);
+    const onCharLoaded = (data) => {
+        setData(data);
     }
-
-    const errorMessage = error ? <ErrorMessage/> : null;
-    const spinner = loading ? <Spinner/> : null;
-    const content = !(loading || error || !char) ? <View char={char}/> : null;
 
     return (
         <>
             <AppBanner/>
-            {errorMessage}
-            {spinner}
-            {content}
+            {setContent(process, View, data)}
         </>
     )
 }
 
-const View = ({char}) => {
-    const {name, description, thumbnail } = char;
+const View = ({data}) => {
+    const {name, description, thumbnail } = data;
 
     return (
         <div className="single-item">
